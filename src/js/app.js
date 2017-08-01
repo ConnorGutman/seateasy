@@ -69,7 +69,7 @@ const bathroomArray = [{
     lat: 40.689767,
     lng: -73.9081967
   }
-]
+];
 
 // Function for creating bathroom objects in KO ================================
 let Bathroom = function(data) {
