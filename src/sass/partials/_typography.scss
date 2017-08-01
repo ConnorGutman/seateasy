@@ -1,0 +1,35 @@
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+#bathroomCard {
+  text-align: center;
+  h1 {
+    text-align: left;
+  }
+  p {
+    text-align: left;
+  }
+  a {
+    color: #000;
+    font-size: 1.25em;
+    i {
+      color: silver;
+      font-size: 1.25em;
+    }
+  }
+}
+
+.logo-ui {
+  text-align: center;
+  font-size: 0.5em;
+  line-height: 7vh;
+  vertical-align: middle;
+  h1 {
+    margin: 0;
+  }
+  @media(min-width: 576px) {
+    font-size: 0.75em;
+    line-height: 10vh;
+  }
+}

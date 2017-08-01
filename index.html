@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>🚽 SeatEasy</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="/dist/css/main.min.css">
+</head>
+
+<body>
+  <div class="logo-ui">
+    <h1>🚽 SeatEasy</h1>
+  </div>
+  <div class="search-ui">
+    <input type="text" class="search-input" id="search" placeholder="Search for bathrooms!" data-bind="textInput: userInput, event: {keyup: searchResultsMarkers}">
+    <div id="search-button"><i class="material-icons">search</i></div>
+  </div>
+  <div class="sidebar-ui">
+    <div id="list-holder">
+      <ul id="list-view" data-bind="foreach: searchResults">
+        <li id="list-name" data-bind="text: name, click: $parent.showCard"></li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-9" id="map"></div>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
+  <script src="dist/js/app.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD2S-LELreF5XRdVqrPIUHk28GLadxfHls&callback=initMap" async defer></script>
+</body>
+
+</html>
