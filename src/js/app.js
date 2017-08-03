@@ -15,6 +15,12 @@ function initMap() {
   ko.applyBindings(new VM());
 }
 
+// Catch errors for GMAPS
+function mapError() {
+  "use strict";
+  document.getElementById('message').innerHTML = "<h2>Google Maps couldn't be reached. Please refresh the page and check your internet connection.</h2>";
+}
+
 // New York's hottest bathrooms ================================================
 const bathroomArray = [{
     id: "4d9c92f4baae54815f2cde64",
@@ -102,97 +108,106 @@ let VM = function() {
   });
   // Loop through each bathroom in this.bathrooms and assign values
   self.bathrooms().forEach(function(bathroom) {
-    // Create a marker for the bathroom
-    marker = new google.maps.Marker({
-      position: new google.maps.LatLng(bathroom.lat(), bathroom.lng()),
-      map: map,
-      animation: google.maps.Animation.DROP // Set animation to drop
-    });
-    // Assign marker
-    bathroom.marker = marker;
+      // Create a marker for the bathroom
+      marker = new google.maps.Marker({
+        position: new google.maps.LatLng(bathroom.lat(), bathroom.lng()),
+        map: map,
+        animation: google.maps.Animation.DROP // Set animation to drop
+      });
+      // Assign marker
+      bathroom.marker = marker;
 
-    // I went with foursquare because Yelp's fusion API doesn't support client-end calls. Meh. :/
-    // For each bathroom in the array, make a AJAX call to Foursquare to scrape data
-    $.ajax({
-      url: 'https://api.foursquare.com/v2/venues/' + bathroom.id() +
-        '?client_id=0K0OIU022VPILROCPI32UUS1IUAQ4EC332OSQJ24NJRF1SQU&client_secret=Z1KWVRGSHJVPMH2UZOPWZQKJM2OABK3FXHW5B04M3KKXIB4M&v=20170731',
-      dataType: "json",
-      success: function(data) {
-        // If the AJAX call works:
-        // This cleans up the response to make it easier to parse!
-        let result = data.response.venue;
+      // I went with foursquare because Yelp's fusion API doesn't support client-end calls. Meh. :/
+      // For each bathroom in the array, make a AJAX call to Foursquare to scrape data
+      $.ajax({
+          url: 'https://api.foursquare.com/v2/venues/' + bathroom.id() +
+            '?client_id=0K0OIU022VPILROCPI32UUS1IUAQ4EC332OSQJ24NJRF1SQU&client_secret=Z1KWVRGSHJVPMH2UZOPWZQKJM2OABK3FXHW5B04M3KKXIB4M&v=20170731',
+          dataType: "json",
+          success: function(data) {
+            // If the AJAX call works:
+            // This cleans up the response to make it easier to parse!
+            let result = data.response.venue;
 
-        // Grab Website, Image, and Bio. If nothing is returned set the value to a blank string.
+            // Grab Website, Image, and Bio. If nothing is returned set the value to a blank string.
 
-        let website = result.hasOwnProperty('url') ? result.url : '';
-        bathroom.website(website || '');
+            let website = result.hasOwnProperty('url') ? result.url : '';
+            bathroom.website(website || '');
 
-        if (result.bestPhoto.hasOwnProperty('prefix') && result.bestPhoto.hasOwnProperty('suffix')) {
-          bathroom.img(result.bestPhoto.prefix + '250x250' + result.bestPhoto.suffix || '');
-        } else {
-          bathroom.img('');
+            if (result.bestPhoto.hasOwnProperty('prefix') && result.bestPhoto.hasOwnProperty('suffix')) {
+              bathroom.img(result.bestPhoto.prefix + '250x250' + result.bestPhoto.suffix || '');
+            } else {
+              bathroom.img('');
+            }
+
+            let bio = result.hasOwnProperty('description') ? result.description : '';
+            bathroom.bio(bio || '');
+
+            // Put together card
+            let card = '<div id="bathroomCard"><img id="bathroomPhoto" src="' +
+              bathroom.img() +
+              '" alt="Image of Location"><h1>' + bathroom.name() + '</h1><p><a href=' + bathroom.website() + '><i class="material-icons">info</i> Visit website</a> <a target="_blank" href=https://www.google.com/maps/dir/Current+Location/' +
+              bathroom.lat() + ',' + bathroom.lng() + '><i class="material-icons">location_on</i> Get directions</a></p><p>' + bathroom.bio() + '</p></div>';
+
+            // Add event listener for card
+            google.maps.event.addListener(bathroom.marker, 'click', function() {
+              IW.open(map, this);
+              bathroom.marker.setAnimation(google.maps.Animation.BOUNCE);
+              setTimeout(function() {
+                bathroom.marker.setAnimation(null);
+              }, 500);
+              IW.setContent(card);
+              map.setCenter(bathroom.marker.getPosition());
+            });
+          },
+          // Handle errors
+          error: function(e) {
+            let card = '<p>Data not found. :(</p>';
+          google.maps.event.addListener(bathroom.marker, 'click', function() {
+            IW.open(map, this);
+            bathroom.marker.setAnimation(google.maps.Animation.BOUNCE);
+            setTimeout(function() {
+              bathroom.marker.setAnimation(null);
+            }, 500);
+            IW.setContent(card);
+            map.setCenter(bathroom.marker.getPosition());
+          });
+          document.getElementById("message").innerHTML = "<p>Data not found. :(</p>";
         }
-
-        let bio = result.hasOwnProperty('description') ? result.description : '';
-        bathroom.bio(bio || '');
-
-        // Put together card
-        let card = '<div id="bathroomCard"><img id="bathroomPhoto" src="' +
-          bathroom.img() +
-          '" alt="Image of Location"><h1>' + bathroom.name() + '</h1><p><a href=' + bathroom.website() + '><i class="material-icons">info</i> Visit website</a> <a target="_blank" href=https://www.google.com/maps/dir/Current+Location/' +
-          bathroom.lat() + ',' + bathroom.lng() + '><i class="material-icons">location_on</i> Get directions</a></p><p>' + bathroom.bio() + '</p></div>';
-
-        // Add event listener for card
-        google.maps.event.addListener(bathroom.marker, 'click', function() {
-          IW.open(map, this);
-          bathroom.marker.setAnimation(google.maps.Animation.BOUNCE);
-          setTimeout(function() {
-            bathroom.marker.setAnimation(null);
-          }, 500);
-          IW.setContent(card);
-          map.setCenter(bathroom.marker.getPosition());
-        });
-      },
-      // Handle errors
-      error: function(e) {
-        IW.setContent('<p>Data not found. :(</p>');
-        document.getElementById("error").innerHTML = "<p>Data not found. :(</p>";
-      }
-    });
+      });
   });
 
-  // Toggle card when user clicks on a list item
-  self.showCard = function(bathroom) {
-    google.maps.event.trigger(bathroom.marker, 'click');
-  };
+// Toggle card when user clicks on a list item
+self.showCard = function(bathroom) {
+  google.maps.event.trigger(bathroom.marker, 'click');
+};
 
-  // Search code ===============================================================
-  // Search results array
-  self.searchResults = ko.observableArray();
+// Search code ===============================================================
+// Search results array
+self.searchResults = ko.observableArray();
 
-  // Start by adding all bathrooms
+// Start by adding all bathrooms
+self.bathrooms().forEach(function(bathroom) {
+  self.searchResults.push(bathroom);
+});
+
+// On User Input update KO
+self.userInput = ko.observable('');
+
+// Refine results based upon user's search
+self.searchResultsMarkers = function() {
+  let searchInput = self.userInput().toLowerCase();
+  self.searchResults.removeAll();
   self.bathrooms().forEach(function(bathroom) {
-    self.searchResults.push(bathroom);
+    bathroom.marker.setVisible(false);
+    // If bathroom matches search, add it to the array
+    if (bathroom.name().toLowerCase().indexOf(searchInput) !== -1) {
+      self.searchResults.push(bathroom);
+    }
   });
-
-  // On User Input update KO
-  self.userInput = ko.observable('');
-
-  // Refine results based upon user's search
-  self.searchResultsMarkers = function() {
-    let searchInput = self.userInput().toLowerCase();
-    self.searchResults.removeAll();
-    self.bathrooms().forEach(function(bathroom) {
-      bathroom.marker.setVisible(false);
-      // If bathroom matches search, add it to the array
-      if (bathroom.name().toLowerCase().indexOf(searchInput) !== -1) {
-        self.searchResults.push(bathroom);
-      }
-    });
-    // If bathroom matches search, add marker
-    self.searchResults().forEach(function(bathroom) {
-      bathroom.marker.setVisible(true);
-    });
-  };
+  // If bathroom matches search, add marker
+  self.searchResults().forEach(function(bathroom) {
+    bathroom.marker.setVisible(true);
+  });
+};
 
 };
