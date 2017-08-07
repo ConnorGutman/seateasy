@@ -22,7 +22,7 @@ SeatEasy maps out all of my personal favorite places to 💩 in NYC. It integrat
 * [Google Maps](https://developers.google.com/maps/)
 * [Foursquare](https://developer.foursquare.com/)
 * Knockout.js
-* SASS
+* SASS /SCSS
 * Material Icons
 * Google Fonts (Roboto)
 
